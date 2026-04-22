@@ -1,0 +1,14 @@
+.env
+.venv/
+__pycache__/
+*.pyc
+
+# Data & Logs
+data/*.csv
+logs/*.log
+
+# Model artifacts
+models/*.ubj
+models/*.json
+models/*.txt
+models/*.png

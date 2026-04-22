@@ -1,0 +1,10 @@
+streamlit
+psycopg2-binary
+pandas
+plotly
+python-dotenv
+requests
+matplotlib
+chronos-forecasting
+torch
+accelerate
