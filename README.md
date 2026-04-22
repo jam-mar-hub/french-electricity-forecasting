@@ -1,8 +1,8 @@
-# ⚡ French Electricity Consumption Forecasting
+# French Electricity Consumption Forecasting
 
 This project provides an end-to-end pipeline for monitoring and predicting electricity consumption in France. It leverages the **RTE (Réseau de Transport d'Électricité) API** for real-time data and Amazon's **Chronos-2** (a generative time-series model) for high-accuracy forecasting.
 
-## 🏗️ Project Architecture
+## Project Architecture
 
 The project is structured around a data pipeline that moves from raw API ingestion to a PostgreSQL database (Supabase), followed by AI-driven predictions and a Streamlit visualization dashboard.
 
@@ -14,7 +14,7 @@ The project is structured around a data pipeline that moves from raw API ingesti
 
 ---
 
-## 🛠️ Components
+## Components
 
 ### 1. Data Processing (`scripts/data_processing.py`)
 This script handles the initial heavy lifting. It fetches historical consumption data from 2020 to the present day using the RTE API.
@@ -45,7 +45,7 @@ A comprehensive UI to explore the data:
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 - Python 3.9+
