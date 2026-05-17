@@ -2,8 +2,8 @@ name: Daily Pipeline
 
 on:
   schedule:
-    - cron: '0 0 * * *'  # tous les jours à minuit UTC
-  workflow_dispatch:       # permet de lancer manuellement depuis GitHub
+    - cron: '0 0 * * *'
+  workflow_dispatch:
 
 jobs:
   run-pipeline:
@@ -20,6 +20,9 @@ jobs:
 
       - name: Install dependencies
         run: pip install uv && uv pip install --system -r pyproject.toml
+
+      - name: Create logs directory
+        run: mkdir -p logs
 
       - name: Run fetch_data
         env:
