@@ -75,7 +75,9 @@ st.subheader("48h Forecast")
 
 now = pd.Timestamp.now(tz='UTC')
 
-df_future = df_predictions[df_predictions['timestamp'] > now]
+latest_pred_date = df_predictions['prediction_date'].max()
+df_future = df_predictions[df_predictions['prediction_date'] == latest_pred_date]
+
 df_context = df_historical[df_historical['timestamp'] >= now - pd.Timedelta(hours=168)]
 
 fig_future = go.Figure()
