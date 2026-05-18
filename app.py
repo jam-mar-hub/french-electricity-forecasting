@@ -76,7 +76,7 @@ st.subheader("Backtest — Model evaluation by period")
 period_options = {
     "Jan 2025 – Jun 2025": ("2025-01-01", "2025-06-30"),
     "Jul 2025 – Dec 2025": ("2025-07-01", "2025-12-31"),
-    f"Jan 2026 – Today": ("2026-01-01", date.today().strftime("%Y-%m-%d")),
+    "Jan 2026 – Today": ("2026-01-01", date.today().strftime("%Y-%m-%d")),
 }
 
 selected_period = st.selectbox("Select a period", list(period_options.keys()))

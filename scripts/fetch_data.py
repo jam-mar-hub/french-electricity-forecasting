@@ -1,5 +1,4 @@
 import logging
-import os
 from datetime import datetime, timedelta
 
 from psycopg2.extras import execute_values
