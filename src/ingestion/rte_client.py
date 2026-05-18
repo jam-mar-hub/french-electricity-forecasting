@@ -6,26 +6,6 @@ from datetime import datetime
 
 load_dotenv()
 
-def get_token():
-    url_token = "https://digital.iservices.rte-france.com/token/oauth"
-    username = os.getenv("RTE_USERNAME")
-    password = os.getenv("RTE_PASSWORD")
-    response = requests.post(
-        url_token,
-        data={'grant_type': 'client_credentials'},
-        auth=(username, password)
-    )
-    return response.json().get("access_token")
-
-
-def fetch_realised(start_date: datetime, end_date: datetime) -> pd.DataFrame:
- import requests
-import pandas as pd
-import os
-from dotenv import load_dotenv
-from datetime import datetime
-
-load_dotenv()
 
 def get_token():
     url_token = "https://digital.iservices.rte-france.com/token/oauth"
