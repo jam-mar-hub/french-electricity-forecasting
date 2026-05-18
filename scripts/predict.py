@@ -24,7 +24,7 @@ def main():
     cursor.execute("""
         SELECT timestamp, value FROM historical_data 
         ORDER BY timestamp DESC 
-        LIMIT 168
+        LIMIT 8192
     """)
     rows = cursor.fetchall()
 
@@ -47,13 +47,18 @@ def main():
     )
 
     prediction_date = datetime.now(timezone.utc)
-    rows_to_insert = [
-        (row['start_date'], row['predictions'], row['0.1'], row['0.9'], 'chronos-2', 'H+48', prediction_date)
-        for _, row in pred_df.iterrows()
-    ]
+    rows_to_insert = []
+    for _, row in pred_df.iterrows():
+        ts = row['start_date']
+        predicted = row['predictions']
+        ground_truth = None
+        mape_val = None
+        rows_to_insert.append((
+            ts, predicted, row['0.1'], row['0.9'], mape_val, 'chronos-2', 'H+48', prediction_date
+        ))
 
     execute_values(cursor, """
-        INSERT INTO predictions (timestamp, predicted_value, q10, q90, model_name, horizon, prediction_date)
+        INSERT INTO predictions (timestamp, predicted_value, q10, q90, mape, model_name, horizon, prediction_date)
         VALUES %s
         ON CONFLICT (timestamp) DO UPDATE SET
             predicted_value = EXCLUDED.predicted_value,
