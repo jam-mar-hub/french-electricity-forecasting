@@ -51,7 +51,6 @@ def main():
     for _, row in pred_df.iterrows():
         ts = row['start_date']
         predicted = row['predictions']
-        ground_truth = None
         mape_val = None
         rows_to_insert.append((
             ts, predicted, row['0.1'], row['0.9'], mape_val, 'chronos-2', 'H+48', prediction_date

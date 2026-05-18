@@ -29,6 +29,8 @@ def main():
     start_date = last_timestamp.replace(tzinfo=None).replace(hour=0, minute=0, second=0) - timedelta(days=1)
     end_date = datetime.now().replace(microsecond=0)
 
+    logging.info("Récupération du token RTE...")
+
     df_raw = fetch_realised(start_date, end_date)
     df_final = compute_hourly_avg(df_raw)
     logging.info(f"{len(df_final)} lignes après traitement")
