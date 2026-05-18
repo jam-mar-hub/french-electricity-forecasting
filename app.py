@@ -73,15 +73,12 @@ st.markdown("---")
 # --- PRÉDICTIONS FUTURES ---
 st.subheader("48h Forecast")
 
-
 now = df_historical['timestamp'].max()
 
-df_future = df_predictions[df_predictions['timestamp'] > now]
+df_future = df_predictions[df_predictions['timestamp'] >= now]
 df_context = df_historical[df_historical['timestamp'] >= now - pd.Timedelta(hours=168)]
 
-# À insérer temporairement pour déboguer
-st.write(f"Nombre de lignes futures : {len(df_future)}")
-st.write(f"Date max des prédictions : {df_future['timestamp'].max()}")
+st.write(df_future['timestamp'].tail())
 
 fig_future = go.Figure()
 
