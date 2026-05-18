@@ -34,3 +34,15 @@ jobs:
           RTE_USERNAME: ${{ secrets.RTE_USERNAME }}
           RTE_PASSWORD: ${{ secrets.RTE_PASSWORD }}
         run: python -m scripts.fetch_data
+
+      - name: Run fetch_rte_forecast (RTE Benchmark)
+        env:
+          SUPABASE_HOST: ${{ secrets.SUPABASE_HOST }}
+          SUPABASE_DB: ${{ secrets.SUPABASE_DB }}
+          SUPABASE_USER: ${{ secrets.SUPABASE_USER }}
+          SUPABASE_PASSWORD: ${{ secrets.SUPABASE_PASSWORD }}
+          SUPABASE_PORT: ${{ secrets.SUPABASE_PORT }}
+          RTE_USERNAME: ${{ secrets.RTE_USERNAME }} 
+          RTE_PASSWORD: ${{ secrets.RTE_PASSWORD }}
+        
+        run: python -m scripts.fetch_rte_forecast
