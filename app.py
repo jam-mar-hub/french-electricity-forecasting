@@ -166,7 +166,7 @@ fig = go.Figure()
 
 fig.add_trace(go.Scatter(x=df_context['timestamp'], y=df_context['value'], name='Historical context', line=dict(color='#1f77b4')))
 fig.add_trace(go.Scatter(x=df_truth['timestamp'], y=df_truth['value'], name='Ground Truth', line=dict(color='green', width=2)))
-fig.add_trace(go.Scatter(x=df_batch['timestamp'], y=df_batch['predicted_value'], name='Your Model', line=dict(color='#ff7f0e')))
+fig.add_trace(go.Scatter(x=df_batch['timestamp'], y=df_batch['predicted_value'], name='Chronos-2 Zero Shot', line=dict(color='#ff7f0e')))
 fig.add_trace(go.Scatter(x=df_rte_batch['timestamp'], y=df_rte_batch['predicted_value'], name='RTE Forecast', line=dict(color='#8B5CF6')))
 
 
