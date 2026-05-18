@@ -26,17 +26,16 @@ def load_historical():
 @st.cache_data(ttl=3600)
 def load_predictions():
     conn = get_connection()
-    df = pd.read_sql("SELECT timestamp, predicted_value, q10, q90, model_name, prediction_date FROM predictions ORDER BY timestamp ASC", conn)
+    # Nettoyage : q10 et q90 ont été retirés de la requête SQL
+    df = pd.read_sql("SELECT timestamp, predicted_value, model_name, prediction_date FROM predictions ORDER BY timestamp ASC", conn)
     conn.close()
     df['timestamp'] = pd.to_datetime(df['timestamp'], utc=True)
     df['prediction_date'] = pd.to_datetime(df['prediction_date'], utc=True)
     return df
 
-# --- 1. NOUVELLE FONCTION POUR CHARGER LES PRÉDICTIONS RTE ---
 @st.cache_data(ttl=3600)
 def load_rte_predictions():
     conn = get_connection()
-    # On filtre sur l'horizon 'H+48' que tu as corrigé en BDD
     df = pd.read_sql("SELECT timestamp, predicted_value FROM predictions_rte WHERE horizon = 'H+48' ORDER BY timestamp ASC", conn)
     conn.close()
     df['timestamp'] = pd.to_datetime(df['timestamp'], utc=True)
@@ -44,7 +43,7 @@ def load_rte_predictions():
 
 df_historical = load_historical()
 df_predictions = load_predictions()
-df_rte = load_rte_predictions() # Appel du chargement RTE
+df_rte = load_rte_predictions()
 
 def calculate_mape(df_hist, df_pred, value_col='predicted_value'):
     merged = df_pred.set_index('timestamp').join(
@@ -56,20 +55,20 @@ def calculate_mape(df_hist, df_pred, value_col='predicted_value'):
     return round(mape, 2)
 
 mape = calculate_mape(df_historical, df_predictions)
-mape_rte = calculate_mape(df_historical, df_rte) # MAPE historique RTE
+mape_rte = calculate_mape(df_historical, df_rte)
 
 # --- HEADER ---
 st.title("⚡ French Electricity Consumption Forecasting")
 st.markdown("---")
 
 # --- MÉTRIQUES ---
-col1, col2, col3, col4 = st.columns(4) # Changement à 4 colonnes pour inclure RTE
+col1, col2, col3, col4 = st.columns(4)
 with col1:
     st.metric("Historical records", f"{len(df_historical):,} hours")
 with col2:
-    st.metric("Last update", df_historical['timestamp'].max().strftime("%Y-%m-%d %H:%M UTC"))
+    st.metric("Last update", df_historical['timestamp'].max().strftime("%d %b, %H:%M UTC"))
 with col3:
-    st.metric("Your Model MAPE", f"{mape}%" if mape else "N/A", help="Computed on past backtests vs ground truth")
+    st.metric("Chronos-2 Zero Shot MAPE", f"{mape}%" if mape else "N/A", help="Computed on past backtests vs ground truth")
 with col4:
     st.metric("RTE Model MAPE", f"{mape_rte}%" if mape_rte else "N/A", help="Benchmark with RTE H+48 forecast")
 
@@ -84,15 +83,13 @@ st.line_chart(df_period)
 
 st.markdown("---")
 
-# --- PRÉDICTIONS FUTURES (Graphique principal) ---
+# --- PRÉDICTIONS FUTURES ---
 st.subheader("48h Forecast Comparison")
 
 now = df_historical['timestamp'].max()
 
 df_future = df_predictions[df_predictions['timestamp'] > now]
 df_context = df_historical[df_historical['timestamp'] >= now - pd.Timedelta(hours=168)]
-
-# --- 2. FILTRAGE DES DONNÉES FUTURES RTE ---
 df_rte_future = df_rte[df_rte['timestamp'] > now]
 
 fig_future = go.Figure()
@@ -109,27 +106,19 @@ fig_future.add_trace(go.Scatter(
 fig_future.add_trace(go.Scatter(
     x=df_future['timestamp'],
     y=df_future['predicted_value'],
-    name='Your Model Forecast',
+    name='Chronos-2 Zero Shot Forecast',
     line=dict(color='#ff7f0e', width=3)
 ))
 
-# --- 3. AJOUT DE LA TRACE RTE SUR LE GRAPHIQUE ---
+# Modèle RTE
 fig_future.add_trace(go.Scatter(
     x=df_rte_future['timestamp'],
     y=df_rte_future['predicted_value'],
     name='RTE Benchmark (H+48)',
-    line=dict(color='#A3A3A3', dash='dash', width=2.5) # Style grisé pointillé pour distinguer
+    line=dict(color='#A3A3A3', dash='dash', width=2.5)
 ))
 
-# Ton intervalle de confiance
-fig_future.add_trace(go.Scatter(
-    x=pd.concat([df_future['timestamp'], df_future['timestamp'][::-1]]),
-    y=pd.concat([df_future['q90'], df_future['q10'][::-1]]),
-    fill='toself',
-    fillcolor='rgba(255,127,14,0.11)',
-    line=dict(color='rgba(255,255,255,0)'),
-    name='Your Model Conf. Interval'
-))
+# (L'intervalle de confiance st.add_trace pour q10/q90 a été supprimé d'ici)
 
 fig_future.update_layout(
     xaxis_title="Date",
@@ -157,21 +146,20 @@ start = pd.Timestamp(start_str, tz='UTC')
 end = pd.Timestamp(end_str, tz='UTC')
 
 df_batch = df_predictions[(df_predictions['timestamp'] >= start) & (df_predictions['timestamp'] <= end)]
-df_rte_batch = df_rte[(df_rte['timestamp'] >= start) & (df_rte['timestamp'] <= end)] # Filtrage RTE période
+df_rte_batch = df_rte[(df_rte['timestamp'] >= start) & (df_rte['timestamp'] <= end)]
 df_truth = df_historical[(df_historical['timestamp'] >= start) & (df_historical['timestamp'] <= end)]
 
 batch_mape = calculate_mape(df_truth, df_batch)
-batch_mape_rte = calculate_mape(df_truth, df_rte_batch) # MAPE RTE de la période sélectionnée
+batch_mape_rte = calculate_mape(df_truth, df_rte_batch)
 
 col1, col2, col3 = st.columns(3)
 with col1:
     st.metric("Period", selected_period)
 with col2:
-    st.metric("Your Model MAPE", f"{batch_mape}%" if batch_mape else "N/A")
+    st.metric("Chronos-2 Zero Shot MAPE", f"{batch_mape}%" if batch_mape else "N/A")
 with col3:
     st.metric("RTE MAPE (Benchmark)", f"{batch_mape_rte}%" if batch_mape_rte else "N/A")
 
-# Contexte historique
 df_context = df_historical[(df_historical['timestamp'] >= start - pd.Timedelta(hours=168)) & (df_historical['timestamp'] < start)]
 
 fig = go.Figure()
@@ -179,18 +167,8 @@ fig = go.Figure()
 fig.add_trace(go.Scatter(x=df_context['timestamp'], y=df_context['value'], name='Historical context', line=dict(color='#1f77b4')))
 fig.add_trace(go.Scatter(x=df_truth['timestamp'], y=df_truth['value'], name='Ground Truth', line=dict(color='green', width=2)))
 fig.add_trace(go.Scatter(x=df_batch['timestamp'], y=df_batch['predicted_value'], name='Your Model', line=dict(color='#ff7f0e')))
-
-# Ajout de la RTE sur le graphique de Backtest historique
 fig.add_trace(go.Scatter(x=df_rte_batch['timestamp'], y=df_rte_batch['predicted_value'], name='RTE Forecast', line=dict(color='#A3A3A3', dash='dash')))
 
-fig.add_trace(go.Scatter(
-    x=pd.concat([df_batch['timestamp'], df_batch['timestamp'][::-1]]),
-    y=pd.concat([df_batch['q90'], df_batch['q10'][::-1]]),
-    fill='toself',
-    fillcolor='rgba(255,127,14,0.15)',
-    line=dict(color='rgba(255,255,255,0)'),
-    name='Confidence interval'
-))
 
 fig.update_layout(xaxis_title="Date", yaxis_title="Consumption (MW)", hovermode='x unified', height=500)
 st.plotly_chart(fig, use_container_width=True)
