@@ -115,7 +115,7 @@ fig_future.add_trace(go.Scatter(
     x=df_rte_future['timestamp'],
     y=df_rte_future['predicted_value'],
     name='RTE Benchmark (H+48)',
-    line=dict(color='#A3A3A3', dash='dash', width=2.5)
+    line=dict(color='#8B5CF6', width=2)
 ))
 
 # (L'intervalle de confiance st.add_trace pour q10/q90 a été supprimé d'ici)

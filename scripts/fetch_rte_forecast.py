@@ -22,9 +22,13 @@ def main():
     conn = get_connection()
     cursor = conn.cursor()
 
+    cursor.execute("SELECT timestamp FROM predictions_rte ORDER BY timestamp DESC LIMIT 1")
+    last_timestamp = cursor.fetchone()[0]
+    logging.info(f"Dernier timestamp en base : {last_timestamp}")
+
     # 1. Configuration des dates (1er Janvier 2020 jusqu'à aujourd'hui)
-    start_date = datetime(2020, 1, 1, 0, 0, 0)
-    global_end_date = datetime.now().replace(microsecond=0)
+    start_date = last_timestamp.replace(tzinfo=None).replace(hour=0, minute=0, second=0) - timedelta(days=1)
+    global_end_date = (datetime.now() + timedelta(days=2)).replace(hour=0, minute=0, second=0, microsecond=0)
 
     logging.info(f"Lancement de la récupération du {start_date} au {global_end_date}")
     logging.info("Récupération du token RTE...")
