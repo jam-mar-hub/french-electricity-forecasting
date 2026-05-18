@@ -78,7 +78,6 @@ now = df_historical['timestamp'].max()
 df_future = df_predictions[df_predictions['timestamp'] > now]
 df_context = df_historical[df_historical['timestamp'] >= now - pd.Timedelta(hours=168)]
 
-st.write(df_future['timestamp'].tail())
 
 fig_future = go.Figure()
 
