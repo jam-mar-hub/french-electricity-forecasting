@@ -70,6 +70,50 @@ st.line_chart(df_period)
 
 st.markdown("---")
 
+# --- PRÉDICTIONS FUTURES ---
+st.subheader("48h Forecast")
+
+now = pd.Timestamp.now(tz='UTC')
+
+df_future = df_predictions[df_predictions['timestamp'] > now]
+df_context = df_historical[df_historical['timestamp'] >= now - pd.Timedelta(hours=168)]
+
+fig_future = go.Figure()
+
+fig_future.add_trace(go.Scatter(
+    x=df_context['timestamp'],
+    y=df_context['value'],
+    name='Historical context',
+    line=dict(color='#1f77b4')
+))
+
+fig_future.add_trace(go.Scatter(
+    x=df_future['timestamp'],
+    y=df_future['predicted_value'],
+    name='Forecast',
+    line=dict(color='#ff7f0e')
+))
+
+fig_future.add_trace(go.Scatter(
+    x=pd.concat([df_future['timestamp'], df_future['timestamp'][::-1]]),
+    y=pd.concat([df_future['q90'], df_future['q10'][::-1]]),
+    fill='toself',
+    fillcolor='rgba(255,127,14,0.15)',
+    line=dict(color='rgba(255,255,255,0)'),
+    name='Confidence interval (10%-90%)'
+))
+
+fig_future.update_layout(
+    xaxis_title="Date",
+    yaxis_title="Consumption (MW)",
+    hovermode='x unified',
+    height=400
+)
+
+st.plotly_chart(fig_future, use_container_width=True)
+
+st.markdown("---")
+
 # --- BACKTEST PAR PÉRIODE ---
 st.subheader("Backtest — Model evaluation by period")
 
