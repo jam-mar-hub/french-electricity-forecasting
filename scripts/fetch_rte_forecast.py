@@ -46,8 +46,8 @@ def main():
         logging.info(f"Requête RTE : de {current_start} à {current_end}...")
         
         try:
-            # Appel API pour le modèle "D-1"
-            df_raw = fetch_forecast(current_start, current_end, "D-1")
+            # Appel API pour le modèle "D-2"
+            df_raw = fetch_forecast(current_start, current_end, "D-2")
             
             if df_raw is not None and not df_raw.empty:
                 df_final = compute_hourly_avg(df_raw)
