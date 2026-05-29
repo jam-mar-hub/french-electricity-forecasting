@@ -121,7 +121,7 @@ fig_future.add_trace(go.Scatter(
     line=dict(color='#1f77b4')
 ))
 
-# Ton modèle
+# Zero Shot
 fig_future.add_trace(go.Scatter(
     x=df_future['timestamp'],
     y=df_future['predicted_value'],
@@ -137,7 +137,7 @@ fig_future.add_trace(go.Scatter(
     line=dict(color='#8B5CF6', width=2)
 ))
 
-
+#LoRA
 fig_future.add_trace(go.Scatter(
     x=df_lora_future['timestamp'],
     y=df_lora_future['predicted_value'],
@@ -145,7 +145,6 @@ fig_future.add_trace(go.Scatter(
     line=dict(color='#10B981', width=2)
 ))
 
-# (L'intervalle de confiance st.add_trace pour q10/q90 a été supprimé d'ici)
 
 fig_future.update_layout(
     xaxis_title="Date",
@@ -199,7 +198,7 @@ fig.add_trace(go.Scatter(x=df_context['timestamp'], y=df_context['value'], name=
 fig.add_trace(go.Scatter(x=df_truth['timestamp'], y=df_truth['value'], name='Ground Truth', line=dict(color='green', width=2)))
 fig.add_trace(go.Scatter(x=df_batch['timestamp'], y=df_batch['predicted_value'], name='Chronos-2 Zero Shot', line=dict(color='#ff7f0e')))
 fig.add_trace(go.Scatter(x=df_rte_batch['timestamp'], y=df_rte_batch['predicted_value'], name='RTE Forecast', line=dict(color='#8B5CF6')))
-fig.add_trace(go.Scatter(x=df_lora_batch['timestamp'], y=df_lora_batch['predicted_value'], name='Chronos-2 LoRA', line=dict(color='#8B5CF6')))
+fig.add_trace(go.Scatter(x=df_lora_batch['timestamp'], y=df_lora_batch['predicted_value'], name='Chronos-2 LoRA', line=dict(color="#10B981")))
 
 
 fig.update_layout(xaxis_title="Date", yaxis_title="Consumption (MW)", hovermode='x unified', height=500)
