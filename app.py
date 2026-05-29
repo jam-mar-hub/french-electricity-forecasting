@@ -41,9 +41,19 @@ def load_rte_predictions():
     df['timestamp'] = pd.to_datetime(df['timestamp'], utc=True)
     return df
 
+
+@st.cache_data(ttl=3600)
+def load_lora_predictions():
+    conn = get_connection()
+    df = pd.read_sql("SELECT timestamp, predicted_value, q10, q90 FROM predictions_lora ORDER BY timestamp ASC", conn)
+    conn.close()
+    df['timestamp'] = pd.to_datetime(df['timestamp'], utc=True)
+    return df
+
 df_historical = load_historical()
 df_predictions = load_predictions()
 df_rte = load_rte_predictions()
+df_lora = load_lora_predictions()
 
 def calculate_mape(df_hist, df_pred, value_col='predicted_value'):
     merged = df_pred.set_index('timestamp').join(
@@ -56,13 +66,14 @@ def calculate_mape(df_hist, df_pred, value_col='predicted_value'):
 
 mape = calculate_mape(df_historical, df_predictions)
 mape_rte = calculate_mape(df_historical, df_rte)
+mape_lora = calculate_mape(df_historical, df_lora)
 
 # --- HEADER ---
 st.title("⚡ French Electricity Consumption Forecasting")
 st.markdown("---")
 
 # --- MÉTRIQUES ---
-col1, col2, col3, col4 = st.columns(4)
+col1, col2, col3, col4, col5 = st.columns(5)
 with col1:
     st.metric("Historical records", f"{len(df_historical):,} hours")
 with col2:
@@ -71,6 +82,8 @@ with col3:
     st.metric("Chronos-2 Zero Shot MAPE", f"{mape}%" if mape else "N/A", help="Computed on past backtests vs ground truth")
 with col4:
     st.metric("RTE Model MAPE", f"{mape_rte}%" if mape_rte else "N/A", help="Benchmark with RTE H+48 forecast")
+with col5:
+    st.metric("Chronos-2 LoRA MAPE", f"{mape_lora}%" if mape_lora else "N/A")
 
 st.markdown("---")
 
@@ -118,6 +131,14 @@ fig_future.add_trace(go.Scatter(
     line=dict(color='#8B5CF6', width=2)
 ))
 
+df_lora_future = df_lora[df_lora['timestamp'] > now]
+fig_future.add_trace(go.Scatter(
+    x=df_lora_future['timestamp'],
+    y=df_lora_future['predicted_value'],
+    name='Chronos-2 LoRA Forecast',
+    line=dict(color='#10B981', width=2)
+))
+
 # (L'intervalle de confiance st.add_trace pour q10/q90 a été supprimé d'ici)
 
 fig_future.update_layout(
@@ -148,7 +169,9 @@ end = pd.Timestamp(end_str, tz='UTC')
 df_batch = df_predictions[(df_predictions['timestamp'] >= start) & (df_predictions['timestamp'] <= end)]
 df_rte_batch = df_rte[(df_rte['timestamp'] >= start) & (df_rte['timestamp'] <= end)]
 df_truth = df_historical[(df_historical['timestamp'] >= start) & (df_historical['timestamp'] <= end)]
+df_lora_batch = df_lora[(df_lora['timestamp'] >= start) & (df_lora['timestamp'] <= end)]
 
+batch_mape_lora = calculate_mape(df_truth, df_lora_batch)
 batch_mape = calculate_mape(df_truth, df_batch)
 batch_mape_rte = calculate_mape(df_truth, df_rte_batch)
 
