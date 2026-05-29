@@ -73,17 +73,22 @@ st.title("⚡ French Electricity Consumption Forecasting")
 st.markdown("---")
 
 # --- MÉTRIQUES ---
-col1, col2, col3, col4, col5 = st.columns(5)
+
+col1, col2 = st.columns(2)
 with col1:
     st.metric("Historical records", f"{len(df_historical):,} hours")
 with col2:
-    st.metric("Last update", df_historical['timestamp'].max().strftime("%d %b, %H:%M UTC"))
+    st.metric("Last update", df_historical['timestamp'].max().strftime("%d %b %Y, %H:%M UTC"))
+
+st.markdown("**Overall MAPE — all available history**")
+
+col1, col2, col3 = st.columns(3)
+with col1:
+    st.metric("Chronos-2 Zero Shot", f"{mape}%" if mape else "N/A")
+with col2:
+    st.metric("RTE Benchmark", f"{mape_rte}%" if mape_rte else "N/A")
 with col3:
-    st.metric("Chronos-2 Zero Shot MAPE", f"{mape}%" if mape else "N/A", help="Computed on past backtests vs ground truth")
-with col4:
-    st.metric("RTE Model MAPE", f"{mape_rte}%" if mape_rte else "N/A", help="Benchmark with RTE H+48 forecast")
-with col5:
-    st.metric("Chronos-2 LoRA MAPE", f"{mape_lora}%" if mape_lora else "N/A")
+    st.metric("Chronos-2 LoRA", f"{mape_lora}%" if mape_lora else "N/A")
 
 st.markdown("---")
 
@@ -175,13 +180,15 @@ batch_mape_lora = calculate_mape(df_truth, df_lora_batch)
 batch_mape = calculate_mape(df_truth, df_batch)
 batch_mape_rte = calculate_mape(df_truth, df_rte_batch)
 
-col1, col2, col3 = st.columns(3)
+col1, col2, col3, col4 = st.columns(4)
 with col1:
     st.metric("Period", selected_period)
 with col2:
-    st.metric("Chronos-2 Zero Shot MAPE", f"{batch_mape}%" if batch_mape else "N/A")
+    st.metric("Chronos-2 Zero Shot", f"{batch_mape}%" if batch_mape else "N/A")
 with col3:
-    st.metric("RTE MAPE (Benchmark)", f"{batch_mape_rte}%" if batch_mape_rte else "N/A")
+    st.metric("RTE Benchmark", f"{batch_mape_rte}%" if batch_mape_rte else "N/A")
+with col4:
+    st.metric("Chronos-2 LoRA", f"{batch_mape_lora}%" if batch_mape_lora else "N/A")
 
 df_context = df_historical[(df_historical['timestamp'] >= start - pd.Timedelta(hours=168)) & (df_historical['timestamp'] < start)]
 
